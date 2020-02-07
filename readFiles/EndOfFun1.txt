@@ -1,0 +1,10 @@
+	ASM(\
+		"movl	$1212345789, %%ebx\n\t"\
+		"movl	$1212345789, %%ebx\n\t"\
+		"movl	$1212345789, %%ebx\n\t"\
+		: : : "ebx");
+	ASM("enc_end1:\n\t");
+		
+                 //call to func encode_code
+                  ourCall(encoder
+, addr1, len1);

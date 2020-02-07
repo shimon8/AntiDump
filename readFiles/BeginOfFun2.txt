@@ -1,0 +1,13 @@
+	unsigned int	 addr2, len2;
+	ASM("movl 	$enc_start2, %0\n\t"\
+		"movl 	$enc_end2, %1\n\t"\
+		: "=r"(addr2), "=r"(len2));
+	len2 -= addr2;
+                  ourCall(decoder, addr2, len2);//call to func decode_code
+	ASM("enc_start2:\n\t");
+	ASM(\
+		"movl	$2112345789, %%ebx\n\t"\
+		"movl	$2112345789, %%ebx\n\t"\
+		"movl	$2112345789, %%ebx\n\t"\
+		: : : "ebx");
+char * b2 = "OurStartOurStartOurStar2222222";

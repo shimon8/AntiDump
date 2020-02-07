@@ -1,0 +1,13 @@
+unsigned int	addr1, len1;
+	ASM("movl 	$enc_start1, %0\n\t"\
+		"movl 	$enc_end1, %1\n\t"\
+		: "=r"(addr1), "=r"(len1));
+	len1 -= addr1;
+                  ourCall(decoder,addr1, len1);//call to func decode_code
+	ASM("enc_start1:\n\t");
+	ASM(\
+		"movl	$1112345789, %%ebx\n\t"\
+		"movl	$1112345789, %%ebx\n\t"\
+		"movl	$1112345789, %%ebx\n\t"\
+		: : : "ebx");
+	

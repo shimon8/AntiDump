@@ -1,0 +1,164 @@
+#include <stdlib.h>
+#include <string.h>
+#include "crypt.h"
+//to encrypt the call
+
+unsigned int encoder;
+
+unsigned int decoder;
+unsigned int _mask;
+
+void ourDecreptionXor(unsigned char*	ptr, int length) {
+
+
+
+	for (int i = 0; i < length; i++)
+	{
+                              int x=5;
+		for (size_t j = 0; j < 3; j++)
+		{
+			ptr[i] ^= key1[j] ^ key2[j] ^ key3[j] ^ key4[j];
+
+		}
+		ptr[i] ^=x;
+	}
+}
+void ourEncreptionXor(unsigned char*	ptr, int length) {
+
+
+	for (int i = 0; i < length; i++)
+	{
+                              int x=5;
+		for (size_t j = 0; j < 3; j++)
+		{
+			ptr[i] ^= key1[j] ^ key2[j] ^ key3[j] ^ key4[j];
+
+		}
+		ptr[i] ^=x;
+	}
+}
+void strcopy(unsigned char * dest, unsigned long sizeDest, unsigned char * source, unsigned long sizeSource) //size of the dest
+{
+
+	unsigned long strLen = sizeSource;
+	char * strDecrypt = malloc(strLen);
+	strncpy_s(strDecrypt, strLen, source,strLen);
+	if (strDecrypt[0] != source[0])
+		strDecrypt[0] = source[0];
+	ourDecreptionXor(strDecrypt, strLen);
+	strncpy_s(dest, sizeDest, strDecrypt, strLen);
+   
+}
+void encipher(unsigned long * v, unsigned long * k)
+{
+	register unsigned long  y = v[0], z = v[1], sum = 0, delta = 0x9E3779B9,
+		a = k[0], b = k[1], c = k[2], d = k[3], n = 32;
+
+
+	while (n-- > 0)
+	{
+		sum += delta;
+		y += ((z << 4) + a) ^ (z + sum) ^ ((z >> 5) + b);
+		z += (y << 4) + c ^ y + sum ^ (y >> 5) + d;
+	}
+
+	v[0] = y; v[1] = z;
+	
+
+}
+void decipher(unsigned long * v, unsigned long * k)
+{
+	register unsigned long y = v[0], z = v[1],  //sum = 0xC6EF3720,
+
+		delta = 0x9E3779B9, sum = delta << 5, a = k[0], b = k[1], c = k[2],
+		d = k[3], n = 32;
+
+
+	/* sum = delta<<5, in general sum = delta * n */
+
+	while (n-- > 0)
+	{
+		z -= (y << 4) + c ^ y + sum ^ (y >> 5) + d;
+		y -= (z << 4) + a ^ z + sum ^ (z >> 5) + b;
+		sum -= delta;
+	}
+
+	v[0] = y; v[1] = z;
+
+}
+void ourEncreption(unsigned char*ptr, int length) {
+	int modulo = length % 8;
+	int rounds = length  / 8 ;
+	unsigned long * key = malloc(sizeof(unsigned long) * 4);
+	unsigned char * keyTemp[4];
+	keyTemp[0] = malloc(sizeof(unsigned long) + 1);
+	keyTemp[1] = malloc(sizeof(unsigned long) + 1);
+	keyTemp[2] = malloc(sizeof(unsigned long) + 1);
+	keyTemp[3] = malloc(sizeof(unsigned long) + 1);
+	strcopy(keyTemp[0], 5, key1, 4);
+	strcopy(keyTemp[1], 5, key2, 4);
+	strcopy(keyTemp[2], 5, key3, 4);
+	strcopy(keyTemp[3], 5, key4, 4);
+	for (size_t i = 0; i < 4; i++)
+	{
+		key[i] = keyTemp[i][0] + keyTemp[i][1] + keyTemp[i][2] + keyTemp[i][3];
+	}
+	for (int i = 0; i < rounds; i++)
+	{
+		
+		encipher((unsigned long*)(ptr + 8*i), (unsigned long*)key);
+
+	}
+}
+void ourDecreption(unsigned char*	ptr, int length) {
+	
+	int modulo = length % 8;
+	int rounds = length / 8 ;
+	unsigned long * key = malloc(sizeof(unsigned long) * 4);
+	unsigned char * keyTemp[4];
+	keyTemp[0] = malloc(sizeof(unsigned long) + 1);
+	keyTemp[1] = malloc(sizeof(unsigned long) + 1);
+	keyTemp[2] = malloc(sizeof(unsigned long) + 1);
+	keyTemp[3] = malloc(sizeof(unsigned long) + 1);
+	strcopy(keyTemp[0], 5, key1, 4);
+	strcopy(keyTemp[1], 5, key2, 4);
+	strcopy(keyTemp[2], 5, key3, 4);
+	strcopy(keyTemp[3], 5, key4, 4);
+	for (size_t i = 0; i < 4; i++)
+	{
+		key[i] = keyTemp[i][0] + keyTemp[i][1] + keyTemp[i][2] + keyTemp[i][3];
+	}
+
+	for (int i = 0; i < rounds; i++)
+	{
+	
+		decipher((unsigned long*)(ptr +  8*i), (unsigned long*) key);
+
+	}
+}
+void	decode_code(unsigned char*	ptr, int length)
+{
+	SETRWX((unsigned int)ptr, length);
+                   ourDecreption(ptr, length);
+	SETROX((unsigned int)ptr, length);
+}
+
+/*	This function encodes back the previously decoded memory area 
+ * 	in code section	
+ */
+void	encode_code(unsigned char* ptr, int length)
+{
+	SETRWX((unsigned int)ptr, length);
+	ourEncreption(ptr, length);
+	SETROX((unsigned int)ptr, length);
+}
+void	__attribute__((constructor))	prepare()
+{
+
+
+	/*	Prepare codec function addresses	*/
+	_mask = (unsigned int)rand();				// Create random mask
+	encoder= (unsigned int)encode_code ^ _mask;	// Encrypt "ecnode_code" address	
+	decoder = (unsigned int)decode_code ^ _mask;// Encrypt "decode_code" address
+	
+}

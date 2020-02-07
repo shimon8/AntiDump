@@ -1,0 +1,10 @@
+char * c2 = "OurEndOurEndOurEndOurEnd222222";	
+ASM(\
+		"movl	$2212345789, %%ebx\n\t"\
+		"movl	$2212345789, %%ebx\n\t"\
+		"movl	$2212345789, %%ebx\n\t"\
+		::: "ebx");
+	ASM("enc_end2:\n\t");
+                 //call to func encode_code
+	                  ourCall(encoder
+, addr2, len2);

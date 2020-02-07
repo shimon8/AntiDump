@@ -1,0 +1,16 @@
+	unsigned int	 addr3, len3;
+	ASM("movl 	$enc_start3, %0\n\t"\
+		"movl 	$enc_end3, %1\n\t"\
+		: "=r"(addr3), "=r"(len3));
+	len3 -= addr3;
+                  
+	                  ourCall(decoder, addr3, len3);//call to func decode_code
+	/*	This label is a mark for our decoder and means the beginning of
+	 * 	memory area to decode	*/
+	ASM("enc_start3:\n\t");
+	ASM(\
+		"movl	$3112345789, %%ebx\n\t"\
+		"movl	$3112345789, %%ebx\n\t"\
+		"movl	$3112345789, %%ebx\n\t"\
+		: : : "ebx");
+char * b3 = "OurStartOurStartOurStar3333333";
